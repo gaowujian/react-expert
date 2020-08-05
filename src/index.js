@@ -27,4 +27,4 @@ function Welcome() {
 // React.createElement(Welcome, null);
 const element = Welcome();
 
-ReactDOM.render("hello", document.getElementById("root"));
+ReactDOM.render(element, document.getElementById("root"));
