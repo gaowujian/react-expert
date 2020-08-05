@@ -1,5 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from "./react";
+import ReactDOM from "./react-dom";
 
 // function Welcome() {
 //   return (
@@ -27,4 +27,4 @@ function Welcome() {
 // React.createElement(Welcome, null);
 const element = Welcome();
 
-ReactDOM.render(element, document.getElementById("root"));
+ReactDOM.render("hello", document.getElementById("root"));
