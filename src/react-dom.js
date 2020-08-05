@@ -1,6 +1,4 @@
 function render(element, parentNode) {
-  //   console.log("element", element);
-  //   console.log("parentNode", parentNode);
   // 判断element的类型
   // 如果是文本节点，可能是string或者是number类型
   if (typeof element === "string" || typeof element === "number") {
@@ -8,16 +6,23 @@ function render(element, parentNode) {
     // 直接return，因为新进来的element是一个text节点,再向下走是其他类型节点的判断
     return;
   }
-
+  // 如果element是object，说明是函数组件，原生组件或者是类组件，再去根据其他条件判断
   let type, props;
-  console.log(element);
+  //   console.log(element);
   type = element.type;
   props = element.props;
-  console.log(type, props);
+  //   console.log(type, typeof element);
+  //   如果是类组件, 通过静态属性来判断
+  if (typeof type === "function" && type.isReactComponent) {
+    const returnedElement = new type(props).render();
+    type = returnedElement.type;
+    props = returnedElement.props;
+  }
+
   //   如果是函数组件，element = >
   //   type: Welcome(){}
   //  props: {children:[] } 默认值,如果形如 <Welcome />
-  if (typeof type === "function") {
+  if (typeof type === "function" && !type.isReactComponent) {
     const returnedElement = type(props);
     type = returnedElement.type;
     props = returnedElement.props;
@@ -39,7 +44,6 @@ function render(element, parentNode) {
       const styleObj = props[propName];
       for (const attr in styleObj) {
         domElement.style[attr] = styleObj[attr];
-        console.log(domElement.style.attr);
       }
     } else if (propName === "children") {
       // 如果children是一个节点，那么就是一个单个元素，也放进一个数组中做统一处理

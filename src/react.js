@@ -4,7 +4,6 @@ function createElement(type, config = {}, children) {
   for (const propName in config) {
     props[propName] = config[propName];
   }
-  console.log(props);
   // 获取儿子的数量
   const childrenLength = arguments.length - 2;
   if (childrenLength === 1) {
@@ -20,4 +19,10 @@ function ReactElement(type, props) {
   return element;
 }
 
-export default { createElement };
+class Component {
+  static isReactComponent = true;
+  constructor(props) {
+    this.props = props;
+  }
+}
+export default { createElement, Component };
