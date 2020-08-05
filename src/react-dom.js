@@ -2,13 +2,33 @@ function render(element, parentNode) {
   //   console.log("element", element);
   //   console.log("parentNode", parentNode);
   // 判断element的类型
-  if (typeof element === "string") {
+  // 如果是文本节点，可能是string或者是number类型
+  if (typeof element === "string" || typeof element === "number") {
     parentNode.appendChild(document.createTextNode(element));
     // 直接return，因为新进来的element是一个text节点,再向下走是其他类型节点的判断
     return;
   }
-  let { type, props } = element;
-  console.log(type);
+
+  let type, props;
+  console.log(element);
+  type = element.type;
+  props = element.props;
+  console.log(type, props);
+  //   如果是函数组件，element = >
+  //   type: Welcome(){}
+  //  props: {children:[] } 默认值,如果形如 <Welcome />
+  if (typeof type === "function") {
+    const returnedElement = type(props);
+    type = returnedElement.type;
+    props = returnedElement.props;
+    // type=> "div"
+    // props=> {
+    //   className: "container",
+    //   title: "我是一个title",
+    //   style: { color: "red", fontSize: "28px" },
+    //   children: ["hello ", { type: "span", props: { children: "world!" } }],
+    // };
+  }
   //   创建真实dom
   let domElement = document.createElement(type);
   //   处理props中的属性(className,style,children和其他属性)

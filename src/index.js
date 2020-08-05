@@ -3,7 +3,7 @@ import ReactDOM from "./react-dom";
 
 // function Welcome() {
 //   return (
-//     <div style={{ color: "red" }}>
+//     <div className="container" title="我是一个title" style={{ color: "red" }}>
 //       hello <span>world!</span>
 //     </div>
 //   );
@@ -13,8 +13,11 @@ function Welcome() {
   return /*#__PURE__*/ React.createElement(
     "div",
     {
+      className: "container",
+      title: "\u6211\u662F\u4E00\u4E2Atitle",
       style: {
         color: "red",
+        fontSize: "28px",
       },
     },
     "hello ",
@@ -25,6 +28,8 @@ function Welcome() {
 // <Welcome/>
 // ==>等价于
 // React.createElement(Welcome, null);
-const element = Welcome();
+// const element = Welcome();
+
+const element = React.createElement(Welcome, null);
 
 ReactDOM.render(element, document.getElementById("root"));
