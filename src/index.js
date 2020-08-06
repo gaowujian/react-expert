@@ -1,3 +1,5 @@
+//*引入事务，优化trigger方法
+
 let batchingStrategy = {
   isBatchingUpdates: false, //默认是非批量更新的模式
   dirtyComponents: [], //存储所有的脏组件（组件的状态和页面显示不一样就是脏组件）
@@ -28,7 +30,6 @@ class Component {
     this.$updater = new Updater(this);
   }
   updateComponent() {
-    console.log(this.$updater.pendingStates);
     this.$updater.pendingStates.forEach((partialState) => {
       this.state = Object.assign(this.state, partialState);
     });
@@ -73,20 +74,47 @@ class Counter extends Component {
     console.log(this.state.number);
     this.setState({ number: this.state.number + 1 });
     console.log(this.state.number);
-    this.setState({ number: this.state.number + 1 });
-    console.log(this.state.number);
+    setTimeout(() => {
+      this.setState({ number: this.state.number + 1 });
+      console.log(this.state.number);
+      this.setState({ number: this.state.number + 1 });
+      console.log(this.state.number);
+    }, 0);
   };
   render() {
     return `<button onclick="trigger(event,'add')">${this.props.name}${this.state.number} </button>`;
   }
 }
+
+class Transaction {
+  constructor(wrappers) {
+    this.wrappers = wrappers; //{initialize,close}
+  }
+  perform(anyMethod) {
+    this.wrappers.forEach((wrapper) => {
+      wrapper.initialize();
+    });
+    anyMethod();
+    this.wrappers.forEach((wrapper) => {
+      wrapper.close();
+    });
+  }
+}
+
+let transaction = new Transaction([
+  {
+    initialize: () => {
+      batchingStrategy.isBatchingUpdates = true;
+    },
+    close: () => {
+      batchingStrategy.isBatchingUpdates = false;
+      // 把所有的脏组件根据自己的状态和视图进行重新更新
+      batchingStrategy.batchedUpdates();
+    },
+  },
+]);
 window.trigger = (event, method, ...args) => {
-  // 在事件执行之前，开启批量更新模式，避免频繁的去更新师徒
-  batchingStrategy.isBatchingUpdates = true;
-  event.target.component[method].call(event.target.component, event, ...args);
-  // 时间执行结束之后，关闭批量跟新状态，并去执行批量更新
-  batchingStrategy.isBatchingUpdates = false;
-  // 把所有的脏组件根据自己的状态和视图进行重新更新
-  batchingStrategy.batchedUpdates();
+  const component = event.target.component;
+  transaction.perform(component[method].bind(component, event, ...args));
 };
 new Counter({ name: "tony" }).mount(document.getElementById("root"));

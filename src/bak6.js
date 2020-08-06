@@ -73,8 +73,12 @@ class Counter extends Component {
     console.log(this.state.number);
     this.setState({ number: this.state.number + 1 });
     console.log(this.state.number);
-    this.setState({ number: this.state.number + 1 });
-    console.log(this.state.number);
+    setTimeout(() => {
+      this.setState({ number: this.state.number + 1 });
+      console.log(this.state.number);
+      this.setState({ number: this.state.number + 1 });
+      console.log(this.state.number);
+    }, 0);
   };
   render() {
     return `<button onclick="trigger(event,'add')">${this.props.name}${this.state.number} </button>`;
@@ -83,7 +87,8 @@ class Counter extends Component {
 window.trigger = (event, method, ...args) => {
   // 在事件执行之前，开启批量更新模式，避免频繁的去更新视图
   batchingStrategy.isBatchingUpdates = true;
-  event.target.component[method].call(event.target.component, event, ...args);
+  const component = event.target.component;
+  component[method].call(component, event, ...args);
   // 事件执行结束之后，关闭批量更新模式，并去执行批量更新
   batchingStrategy.isBatchingUpdates = false;
   // 把所有的脏组件根据自己的状态和视图进行重新更新
