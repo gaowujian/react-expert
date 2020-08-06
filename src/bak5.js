@@ -1,4 +1,5 @@
-// 实现事件委托, 把事件挂载到全局，实现事件的触发
+// * 逐步抽象公共的方法到一个父类
+// *实现事件委托, 把事件挂载到全局，实现事件的触发
 class Component {
   constructor(props) {
     this.props = props;
@@ -21,7 +22,7 @@ class Component {
   renderElement() {
     const renderString = this.render();
     this.domElement = this.createDomElementFromDomString(renderString);
-    // 让这个button的component属性等于当前Counter组件的实例
+    // 让这个button的component属性等于当前Counter组件的实例，用来之后委托事件
     this.domElement.component = this;
     return this.domElement;
   }

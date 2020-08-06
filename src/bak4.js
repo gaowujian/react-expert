@@ -1,4 +1,5 @@
-// 实现事件委托, 把事件挂载到全局，实现事件的触发
+// * 逐步抽象公共的方法到一个父类
+// *抽象render方法
 class Component {
   constructor(props) {
     this.props = props;
@@ -14,15 +15,14 @@ class Component {
     this.state = Object.assign(this.state, partialState);
     // 更新dom
     const oldElement = this.domElement;
-    const newElement = this.renderElement();
+    const newElement = this.render();
     oldElement.parentElement.replaceChild(newElement, oldElement);
   }
   // 把原来的render逻辑抽到这个方法中,创建domElement
   renderElement() {
     const renderString = this.render();
     this.domElement = this.createDomElementFromDomString(renderString);
-    // 让这个button的component属性等于当前Counter组件的实例
-    this.domElement.component = this;
+    this.domElement.addEventListener("click", this.add);
     return this.domElement;
   }
   // 挂载 domElement
@@ -43,10 +43,8 @@ class Counter extends Component {
     // this.state = { number: this.state.number + 1 };
   };
   render() {
-    return `<button onclick="trigger(event,'add')">${this.props.name}${this.state.number} </button>`;
+    return `<button>${this.props.name}${this.state.number} </button>`;
   }
 }
-window.trigger = (event, method, ...args) => {
-  event.target.component[method].call(event.target.component, event, ...args);
-};
+
 new Counter({ name: "tony" }).mount(document.getElementById("root"));
