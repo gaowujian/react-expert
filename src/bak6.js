@@ -1,3 +1,4 @@
+//*实现了批量更新模式
 let batchingStrategy = {
   isBatchingUpdates: false, //默认是非批量更新的模式
   dirtyComponents: [], //存储所有的脏组件（组件的状态和页面显示不一样就是脏组件）
@@ -28,7 +29,6 @@ class Component {
     this.$updater = new Updater(this);
   }
   updateComponent() {
-    console.log(this.$updater.pendingStates);
     this.$updater.pendingStates.forEach((partialState) => {
       this.state = Object.assign(this.state, partialState);
     });
@@ -81,10 +81,10 @@ class Counter extends Component {
   }
 }
 window.trigger = (event, method, ...args) => {
-  // 在事件执行之前，开启批量更新模式，避免频繁的去更新师徒
+  // 在事件执行之前，开启批量更新模式，避免频繁的去更新视图
   batchingStrategy.isBatchingUpdates = true;
   event.target.component[method].call(event.target.component, event, ...args);
-  // 时间执行结束之后，关闭批量跟新状态，并去执行批量更新
+  // 事件执行结束之后，关闭批量更新模式，并去执行批量更新
   batchingStrategy.isBatchingUpdates = false;
   // 把所有的脏组件根据自己的状态和视图进行重新更新
   batchingStrategy.batchedUpdates();
