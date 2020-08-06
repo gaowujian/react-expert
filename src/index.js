@@ -1,5 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import LifeCycle from "./components/LifeCycle";
+// import LifeCycle from "./components/LifeCycle";
+import NewLifeCycle from "./components/NewLifeCycle";
 
-ReactDOM.render(<LifeCycle name="计数器" />, document.getElementById("root"));
+ReactDOM.render(
+  <NewLifeCycle name="计数器" />,
+  document.getElementById("root")
+);
