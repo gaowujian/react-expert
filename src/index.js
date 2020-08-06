@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 // import LifeCycle from "./components/LifeCycle";
-import NewLifeCycle from "./components/NewLifeCycle";
+import GetSnapshotBeforeUpdate from "./components/GetSnapshotBeforeUpdate";
 
 ReactDOM.render(
-  <NewLifeCycle name="计数器" />,
+  <GetSnapshotBeforeUpdate name="计数器" />,
   document.getElementById("root")
 );
