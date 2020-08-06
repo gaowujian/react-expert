@@ -15,7 +15,7 @@
 class Counter {
   constructor() {
     this.state = {
-      number: 10,
+      number: 0,
     };
   }
   createDomElementFromDomString(domString) {

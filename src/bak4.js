@@ -34,7 +34,7 @@ class Counter extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      number: 10,
+      number: 0,
     };
   }
 
