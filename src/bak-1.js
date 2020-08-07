@@ -13,7 +13,7 @@ export default class MouseTracker extends React.Component {
   render() {
     return (
       <div
-        style={{ height: "500px", width: "1000px", border: "1px solid red" }}
+        style={{ height: "300px", width: "400px", border: "1px solid red" }}
         onMouseMove={this.handleMouseMove}
       >
         <p>
