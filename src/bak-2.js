@@ -13,27 +13,26 @@ function withMouseTracker(WrappedComponent) {
     };
     render() {
       return (
-        <div
-          style={{ height: "300px", width: "400px", border: "1px solid red" }}
-          onMouseMove={this.handleMouseMove}
-        >
-          <WrappedComponent />
-          <p>
-            鼠标的位置:{this.state.x} {this.state.y}
-          </p>
+        <div onMouseMove={this.handleMouseMove}>
+          <WrappedComponent x={this.state.x} y={this.state.y} />
         </div>
       );
     }
   };
 }
 
-function Picture() {
+function Picture(props) {
   return (
-    <img
-      src={bg}
-      alt="bird"
-      style={{ display: "block", width: "100%", height: "100%" }}
-    />
+    <div style={{ height: "300px", width: "400px", border: "1px solid red" }}>
+      <img
+        src={bg}
+        alt="bird"
+        style={{ display: "block", width: "100%", height: "100%" }}
+      />
+      <p>
+        鼠标的位置:{props.x} {props.y}
+      </p>
+    </div>
   );
 }
 
