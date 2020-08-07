@@ -1,9 +1,20 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+function Fragment(props) {
+  return props.children;
+}
 export default class App extends React.Component {
   render() {
-    return <div>app</div>;
+    return (
+      <Fragment>
+        <ul>
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+        </ul>
+      </Fragment>
+    );
   }
 }
 
