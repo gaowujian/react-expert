@@ -1,10 +1,16 @@
-import React from "react";
-import ReactDOM from "react-dom";
-
-export default class App extends React.Component {
+import React from "./react";
+import ReactDOM from "./react-dom";
+import "./style.css";
+class ClassComponent extends React.Component {
   render() {
-    return <div>app</div>;
+    return (
+      <div className="title" style={{ color: "red" }}>
+        <span>{this.props.name}</span>
+        {this.props.children}
+      </div>
+    );
   }
 }
-
-ReactDOM.render(<App />, document.getElementById("root"));
+let element = <ClassComponent name="hello">world</ClassComponent>;
+console.log(element);
+ReactDOM.render(element, document.getElementById("root"));
