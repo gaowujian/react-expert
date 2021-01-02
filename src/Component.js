@@ -15,7 +15,7 @@ class Component {
    * @memberof Component
    */
   setState(partialState, callback) {
-    this.updater.addState(partialState);
+    this.updater.addState(partialState, callback);
   }
 
   /**
@@ -24,8 +24,14 @@ class Component {
    * @memberof Component
    */
   forceUpdate() {
+    if (this.componentWillUpdate) {
+      this.componentWillUpdate();
+    }
     let newVdom = this.render();
     updateClassComponent(this, newVdom);
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate();
+    }
   }
 }
 

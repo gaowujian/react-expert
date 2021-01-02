@@ -7,6 +7,10 @@ import { addEvent } from "./event";
 function render(vdom, container) {
   const dom = createDOM(vdom);
   container.appendChild(dom);
+  // 挂载到父容器之后才能执行组件的componentDidMount
+  if (dom.componentDidMount) {
+    dom.componentDidMount();
+  }
 }
 
 /**
@@ -122,11 +126,21 @@ function createFunctionComponentDOM(vdom) {
  * @param {*} vdom
  */
 function createClassComponentDOM(vdom) {
-  const { type, props } = vdom;
+  let { type, props } = vdom;
+  if (type.defaultProps) {
+    props = { ...type.defaultProps, ...props };
+  }
   const classInstance = new type(props);
+  if (classInstance.componentWillMount) {
+    classInstance.componentWillMount();
+  }
   const renderVdom = classInstance.render();
   classInstance.oldVdom = renderVdom;
+
   const dom = createDOM(renderVdom);
+  if (classInstance.componentDidMount) {
+    dom.componentDidMount = classInstance.componentDidMount.bind(classInstance);
+  }
   classInstance.dom = dom;
   return dom;
 }

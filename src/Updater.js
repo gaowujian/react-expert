@@ -23,6 +23,7 @@ class Updater {
     this.classInstance = classInstance;
     // * 缓存类实例上的setState
     this.pendingStates = [];
+    this.callbacks = [];
   }
 
   /**
@@ -32,8 +33,20 @@ class Updater {
    * @param {*} partialState
    * @memberof Updater
    */
-  addState(partialState) {
+  addState(partialState, callback) {
     this.pendingStates.push(partialState);
+    this.callbacks.push(callback);
+    this.emitUpdate();
+  }
+
+  /**
+   * 一个组件属性变或者状态变都会更新
+   * props会传入新的props
+   *
+   * @param {*} newProps
+   * @memberof Updater
+   */
+  emitUpdate(newProps) {
     updateQueue.isBatchingUpdate
       ? updateQueue.add(this)
       : this.updateComponent();
@@ -45,11 +58,31 @@ class Updater {
    * @memberof Updater
    */
   updateComponent() {
-    let { classInstance, pendingStates } = this;
+    let { classInstance, pendingStates, callbacks } = this;
     if (pendingStates.length > 0) {
-      debugger;
-      classInstance.state = this.getState();
+      // 需要添加shouldComponentUpdate的逻辑
+      this.shouldUpdate(classInstance, pendingStates, callbacks);
+    }
+  }
+
+  /**
+   * 用来添加shouldComponentUpdate的逻辑
+   * !不管组件是否渲染 组件的state都会变化
+   * * classInstance.state = this.getState();一定会执行
+   *
+   * @param {*} classInstance
+   * @param {*} callbacks
+   * @memberof Updater
+   */
+  shouldUpdate(classInstance, callbacks) {
+    classInstance.state = this.getState();
+    if (
+      classInstance.shouldComponentUpdate &&
+      classInstance.shouldComponentUpdate({}, classInstance.state)
+    ) {
       classInstance.forceUpdate();
+      callbacks.forEach((callback) => callback(classInstance.state));
+      callbacks.length = 0;
     }
   }
 
