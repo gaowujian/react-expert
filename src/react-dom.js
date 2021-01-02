@@ -13,7 +13,7 @@ function render(vdom, container) {
  * @param {*} vdom
  * @return {*} 根据vdom创建的真实dom
  *  在创建真实dom的过程中，需要根据vdom的类型，分情况讨论
- *  1. 空值
+ *  1. 空值, 但是不包含0
  *  1. string或者number
  *  2. 原生组件
  *  3. 函数组件
@@ -21,7 +21,7 @@ function render(vdom, container) {
  */
 export function createDOM(vdom) {
   let dom;
-  if (!vdom) {
+  if (!vdom && vdom != 0) {
     return document.createTextNode("");
   } else if (typeof vdom === "string" || typeof vdom === "number") {
     return document.createTextNode(vdom);

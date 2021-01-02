@@ -1,4 +1,4 @@
-import { updateQueue } from "./Component";
+import { updateQueue } from "./Updater";
 /**
  * 该函数的的触发是在渲染阶段就执行，开始进行合成事件的组装
  * 把事件类型和触发函数都存储在store里，并绑定在元素的实例上，而不是直接调用，
