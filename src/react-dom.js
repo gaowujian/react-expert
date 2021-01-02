@@ -1,3 +1,4 @@
+import { addEvent } from "./event";
 /**
  * @param {*} vdom  一个react元素/vdom
  * @param {*} container 一个真实dom节点，作为父节点
@@ -18,7 +19,7 @@ function render(vdom, container) {
  *  3. 函数组件
  *  4. 类组件
  */
-function createDOM(vdom) {
+export function createDOM(vdom) {
   let dom;
   if (!vdom) {
     return document.createTextNode("");
@@ -68,6 +69,9 @@ function updateProps(dom, props) {
       }
     } else if (key === "children") {
       reconcileChildren(props[key], dom);
+    } else if (key.startsWith("on")) {
+      // ! 需要实现合成事件
+      addEvent(dom, key.toLowerCase(), props[key]);
     } else {
       dom[key] = props[key];
       //   ? 这里不使用setAttribute的原因在于 jsx 上的className 会被设置为真实dom上的属性 <div className>而不是 <div class>
@@ -114,14 +118,17 @@ function createFunctionComponentDOM(vdom) {
 
 /**
  * 创建一个类组件的真实dom
- *
+ * * 主要有两个操作，给类的实例分别绑定上vdom和dom
  * @param {*} vdom
  */
 function createClassComponentDOM(vdom) {
   const { type, props } = vdom;
   const classInstance = new type(props);
   const renderVdom = classInstance.render();
-  return createDOM(renderVdom);
+  classInstance.oldVdom = renderVdom;
+  const dom = createDOM(renderVdom);
+  classInstance.dom = dom;
+  return dom;
 }
 
 const ReactDOM = {
