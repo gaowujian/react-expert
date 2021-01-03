@@ -19,7 +19,6 @@ export function addEvent(dom, eventType, listener) {
 }
 
 /**
- *
  * event是原生的DOM事件对象，从触发事件的元素冒泡至document元素被处理
  * * 先创建好一个包装过的合成事件对象，然后从原生事件的target目标开始，不停的执行listener并把合成事件对象传递进去
  * * 其实button的原生事件已经触发过了，并且冒泡到了document
@@ -46,9 +45,6 @@ function dispatchEvent(event) {
 
 /**
  * 根据冒泡到document中的原生事件，去生成一个合成事件对象
- *
- * @param {*} nativeEvent
- * @return {*}
  */
 function createSyntheticEvent(nativeEvent) {
   let syntheticEvent = {};

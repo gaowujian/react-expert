@@ -31,24 +31,53 @@ class Counter extends React.Component {
   }
 
   handleClick = () => {
-    this.setState({ number: this.state.number + 1 }, (newState) => {
-      console.log(newState);
-    });
+    this.setState({ number: this.state.number + 1 });
   };
   render() {
     console.log("3. render ");
 
     return (
-      <div>
+      <div id={`counter-${this.state.number}`}>
         <h1>name:{this.props.title}</h1>
-        <p>number:{this.state.number}</p>
+        {/* <p>自己的number:{this.state.number}</p>
+        <p>
+          {this.state.number === 4 ? null : (
+            <ChildCounter number={this.state.number} />
+          )}
+        </p> */}
         <button onClick={this.handleClick}>+</button>
       </div>
     );
   }
 }
 
-ReactDOM.render(
-  <Counter title="自定义计数器" />,
-  document.getElementById("root")
-);
+class ChildCounter extends React.Component {
+  componentWillMount() {
+    console.log("2. child componentWillMount组件将要加载 ");
+  }
+
+  componentDidMount() {
+    console.log("4. child componentDidMount组件加载完毕 ");
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log("5. child shouldComponentUpdate询问组件是否需要更新 ");
+    return true;
+  }
+
+  componentWillUpdate() {
+    console.log("6. child componentWillUpdate组件将要更新 ");
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    console.log("7. child componentDidMount组件更新完成 ");
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>count:{this.props.number}</h1>
+      </div>
+    );
+  }
+}
+ReactDOM.render(<Counter />, document.getElementById("root"));

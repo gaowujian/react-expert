@@ -1,5 +1,5 @@
 import Updater from "./Updater";
-import { createDOM } from "./react-dom";
+import { compareTwoVdom, createDOM } from "./react-dom";
 class Component {
   static isReactComponent = true;
   constructor(props) {
@@ -10,16 +10,12 @@ class Component {
 
   /**
    * component把状态更新和渲染视图的指责委托给了Updater
-   * @param {*} partialState
-   * @param {*} callback
-   * @memberof Component
    */
   setState(partialState, callback) {
     this.updater.addState(partialState, callback);
   }
 
   /**
-   *
    * 用于强制更新刷新组件状态
    * @memberof Component
    */
@@ -27,8 +23,13 @@ class Component {
     if (this.componentWillUpdate) {
       this.componentWillUpdate();
     }
-    let newVdom = this.render();
-    updateClassComponent(this, newVdom);
+    const newRenderVdom = this.render();
+    const oldRenderVdom = this.oldRenderVdom;
+    const oldDom = oldRenderVdom.dom;
+    // 实现简易的dom-diff
+    compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom);
+    this.oldRenderVdom = newRenderVdom;
+    // updateClassComponent(this, newVdom);
     if (this.componentDidUpdate) {
       this.componentDidUpdate();
     }

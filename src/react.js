@@ -1,8 +1,5 @@
 import Component from "./Component";
 /**
- * @param {*} type  react元素的类型
- * @param {*} config  jsx语法传入的配置
- * @param {*} children react元素的子元素
  *  * 如果children是一个就没有必要包装成一个数组!!!
  */
 function createElement(type, config, ...children) {
