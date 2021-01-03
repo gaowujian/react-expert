@@ -1,5 +1,5 @@
 // * 当前是使用了一个公用的queue，在每次进入批量更新设置true，更新完毕之后设为false
-
+// ! updateQueue是一个单例模式，所以updaters也是单例
 export let updateQueue = {
   updaters: [],
   isBatchingUpdate: false,
@@ -9,6 +9,7 @@ export let updateQueue = {
   batchUpdate() {
     this.updaters.forEach((updater) => updater.updateComponent());
     this.isBatchingUpdate = false;
+    this.updaters.length = 0;
   },
 };
 
@@ -78,12 +79,13 @@ class Updater {
     classInstance.state = this.getState();
     if (
       classInstance.shouldComponentUpdate &&
-      classInstance.shouldComponentUpdate({}, classInstance.state)
+      !classInstance.shouldComponentUpdate({}, classInstance.state)
     ) {
-      classInstance.forceUpdate();
-      callbacks.forEach((callback) => callback(classInstance.state));
-      callbacks.length = 0;
+      return;
     }
+    classInstance.forceUpdate();
+    callbacks.forEach((callback) => callback(classInstance.state));
+    callbacks.length = 0;
   }
 
   /**

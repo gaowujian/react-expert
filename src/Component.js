@@ -1,5 +1,6 @@
 import Updater from "./Updater";
 import { compareTwoVdom, createDOM } from "./react-dom";
+import { findDOM } from "./react-dom";
 class Component {
   static isReactComponent = true;
   constructor(props) {
@@ -25,17 +26,26 @@ class Component {
     }
     const newRenderVdom = this.render();
     const oldRenderVdom = this.oldRenderVdom;
+    console.log(this.vdom);
+    console.log(this);
+    findDOM(this.vdom);
+    debugger;
     const oldDom = oldRenderVdom.dom;
+    console.log(oldDom);
     // 实现简易的dom-diff
     compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom);
     this.oldRenderVdom = newRenderVdom;
-    // updateClassComponent(this, newVdom);
+
+    // updateClassComponent(this, newRenderVdom);
     if (this.componentDidUpdate) {
       this.componentDidUpdate();
     }
   }
 }
 
+/**
+ * 暴力更新，在引入dom-diff之后，该函数不再使用
+ */
 function updateClassComponent(classInstance, newVdom) {
   let oldDOM = classInstance.dom;
   let newDOM = createDOM(newVdom);
