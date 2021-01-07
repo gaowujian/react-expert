@@ -181,7 +181,6 @@ function createClassComponentDOM(vdom) {
  * 5. 老的有，新的也有，需要做深层的dom diff
  */
 export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
-  // ;
   if (!oldVdom && !newVdom) {
     return;
   } else if (oldVdom && !newVdom) {
@@ -197,14 +196,15 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
   //可能是在中间插入
   else if (!oldVdom && newVdom) {
     let newDom = createDOM(newVdom);
+    // 如果有下一个弟弟dom就插到弟弟前边
     if (nextDOM) {
       parentNode.insertBefore(newDom, nextDOM);
     } else {
       parentNode.appendChild(newDom);
-      // 执行更新过程中，新插入节点的componentDidMount
-      if (newVdom.classInstance && newVdom.classInstance.componentDidMount) {
-        newVdom.classInstance.componentDidMount();
-      }
+    }
+    // 执行更新过程中，新插入节点的componentDidMount
+    if (newVdom.classInstance && newVdom.classInstance.componentDidMount) {
+      newVdom.classInstance.componentDidMount();
     }
     return;
   }
@@ -248,6 +248,7 @@ function updateElement(oldVdom, newVdom) {
     if (oldVdom.type.isReactComponent) {
       updateClassComponent(oldVdom, newVdom); //新老都是类组件，进行类组件的更新
     } else {
+      updateFunctionComponent(oldVdom, newVdom); //新老都是类组件，进行类组件的更新
     }
   }
 }
@@ -268,6 +269,14 @@ function updateClassComponent(oldVdom, newVdom) {
   classInstance.updater.emitUpdate(newVdom.props);
 }
 
+function updateFunctionComponent(oldVdom, newVdom) {
+  const parentDOM = findDOM(oldVdom).parentNode;
+  let { type, props } = newVdom;
+  let newRenderVdom = type(props);
+  compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, newRenderVdom);
+  newVdom.oldRenderVdom = newRenderVdom;
+}
+
 /**
  * 深度比较儿子们,递归
  *
@@ -281,7 +290,16 @@ function updateChildren(parentNode, oldVchildren, newVchildren) {
   newVchildren = Array.isArray(newVchildren) ? newVchildren : [newVchildren];
   let maxLength = Math.max(oldVchildren.length, newVchildren.length);
   for (let i = 0; i < maxLength; i++) {
-    compareTwoVdom(parentNode, oldVchildren[i], newVchildren[i]);
+    // 我们一直不停的传递nextdom下去,
+    let nextDom = oldVchildren.find((item, index) => {
+      return index > i && item && item.dom;
+    });
+    compareTwoVdom(
+      parentNode,
+      oldVchildren[i],
+      newVchildren[i],
+      nextDom && nextDom.dom
+    );
   }
 }
 

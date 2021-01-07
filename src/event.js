@@ -40,6 +40,8 @@ function dispatchEvent(event) {
   for (let key in syntheticEvent) {
     syntheticEvent[key] = null;
   }
+  // ??? 解决问题了？
+  updateQueue.isBatchingUpdate = false;
   updateQueue.batchUpdate();
 }
 

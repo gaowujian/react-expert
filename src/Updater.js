@@ -44,16 +44,18 @@ class Updater {
 
   /**
    * 一个组件属性变或者状态变都会更新
-   * props会传入新的props
+   * props会传入新的props，是props变化引起的更新
    *
    * @param {*} newProps
    * @memberof Updater
    */
   emitUpdate(nextProps) {
     this.nextProps = nextProps;
-    updateQueue.isBatchingUpdate
-      ? updateQueue.add(this)
-      : this.updateComponent();
+    if (updateQueue.isBatchingUpdate) {
+      updateQueue.add(this);
+    } else {
+      this.updateComponent();
+    }
   }
 
   /**
