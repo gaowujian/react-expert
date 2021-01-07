@@ -1,4 +1,5 @@
 import Component from "./Component";
+import { wrapToVdom } from "./utils";
 /**
  *  * 如果children是一个就没有必要包装成一个数组!!!
  */
@@ -9,9 +10,9 @@ function createElement(type, config, ...children) {
   }
   const props = { ...config };
   if (children.length > 1) {
-    props.children = children;
+    props.children = children.map(wrapToVdom);
   } else {
-    props.children = children[0];
+    props.children = wrapToVdom(children[0]);
   }
 
   return {

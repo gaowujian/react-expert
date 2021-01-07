@@ -1,3 +1,4 @@
+import { REACT_TEXT } from "./constant";
 import { addEvent } from "./event";
 /**
  * render函数就是一个挂载函数，把一个vdom渲染到他的父节点上
@@ -26,19 +27,18 @@ export function createDOM(vdom) {
   let dom;
   if (!vdom && vdom != 0) {
     return document.createTextNode("");
-  } else if (typeof vdom === "string" || typeof vdom === "number") {
-    return document.createTextNode(vdom);
   } else {
-    const { type } = vdom;
-    if (typeof type === "function") {
+    const { type, props } = vdom;
+    if (type === REACT_TEXT) {
+      dom = document.createTextNode(props.content);
+      vdom.dom = dom;
+    } else if (typeof type === "function") {
       if (type.isReactComponent) {
         return createClassComponentDOM(vdom);
       } else {
         return createFunctionComponentDOM(vdom);
       }
-    }
-
-    if (typeof type === "string") {
+    } else {
       dom = createNativeDOM(vdom);
     }
   }
@@ -87,15 +87,12 @@ function updateProps(dom, newProps, oldProps) {
 /**
  * 调和props.children,主要负责处理props中的children属性值, 设置return是为了防止陷入多个分支中去
  * 1. string和number, 直接设置成dom的文本内容
- * 2. 单个object对象, 即react原生组件, 插入当前父亲的真实dom，
+ * 2. 单个object对象, 且有type类型, 即react原生组件, 插入当前父亲的真实dom，
  * 3. 数组, 循环插入当前父亲的真实dom节点
  * 4. 其余情况
  */
 function reconcileChildren(childrenVdom, dom) {
-  if (typeof childrenVdom === "string" || typeof childrenVdom === "number") {
-    dom.textContent = childrenVdom;
-    return;
-  } else if (typeof childrenVdom === "object" && childrenVdom.type) {
+  if (typeof childrenVdom === "object" && childrenVdom.type) {
     render(childrenVdom, dom);
     return;
   } else if (Array.isArray(childrenVdom)) {
@@ -131,6 +128,7 @@ function createFunctionComponentDOM(vdom) {
  * 3. classInstance上绑定返回的renderVdom, 方便拿渲染的内容
  * 4. classInstance上绑定了dom，用于暴力更新dom
  * 
+ * vdom是核心，在做操作的时候，需要知道操作的是哪个类，还知道renderVdom是谁。
  * 查找关系 vdom=> classInstance => dom
  *        vdom => renderVdom
  *        classInstance => renderVdom
@@ -183,7 +181,7 @@ function createClassComponentDOM(vdom) {
  * 5. 老的有，新的也有，需要做深层的dom diff
  */
 export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
-  // debugger;
+  // ;
   if (!oldVdom && !newVdom) {
     return;
   } else if (oldVdom && !newVdom) {
@@ -203,6 +201,10 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
       parentNode.insertBefore(newDom, nextDOM);
     } else {
       parentNode.appendChild(newDom);
+      // 执行更新过程中，新插入节点的componentDidMount
+      if (newVdom.classInstance && newVdom.classInstance.componentDidMount) {
+        newVdom.classInstance.componentDidMount();
+      }
     }
     return;
   }
@@ -211,7 +213,7 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
     const oldDom = findDOM(oldVdom);
     const newDom = createDOM(newVdom);
     parentNode.replaceChild(newDom, oldDom);
-    if (oldVdom.classInstance.componentWillUnmount) {
+    if (oldVdom.classInstance && oldVdom.classInstance.componentWillUnmount) {
       oldVdom.classInstance.componentWillUnmount();
     }
     return;
@@ -224,17 +226,62 @@ export function compareTwoVdom(parentNode, oldVdom, newVdom, nextDOM) {
 }
 
 /**
- * 深度比较两个虚拟dom
+ * 一个深度优先的递归比较，深度比较两个虚拟dom,
  *
  * @param {*} oldVdom  <div id="counter">
  * @param {*} newVdom <div id="counter">
  */
 function updateElement(oldVdom, newVdom) {
-  // 先更新属性
-  if (typeof oldVdom.type === "string") {
+  if (oldVdom.type === REACT_TEXT) {
+    let currentDom = (newVdom.dom = oldVdom.dom);
+    currentDom.textContent = newVdom.props.content;
+  }
+  // 原生组件
+  else if (typeof oldVdom.type === "string") {
     //让新的vdom复用老的真实dom
     let currentDom = (newVdom.dom = oldVdom.dom);
+    // 更新属性
     updateProps(currentDom, newVdom.props, oldVdom.props);
+    // 更新儿子
+    updateChildren(currentDom, oldVdom.props.children, newVdom.props.children);
+  } else if (typeof oldVdom.type === "function") {
+    if (oldVdom.type.isReactComponent) {
+      updateClassComponent(oldVdom, newVdom); //新老都是类组件，进行类组件的更新
+    } else {
+    }
+  }
+}
+
+/**
+ * 前后都是类组件，进行比较更新
+ *
+ */
+function updateClassComponent(oldVdom, newVdom) {
+  // 先同步老的vdom上的信息，复用类的实例
+  let classInstance = (newVdom.classInstance = oldVdom.classInstance);
+  newVdom.oldRenderVdom = oldVdom.oldRenderVdom;
+  // 组件将要接受到新的属性，把新的属性传递过来
+  if (classInstance.componentWillReceiveProps) {
+    classInstance.componentWillReceiveProps();
+  }
+  // newVdom携带有新的props
+  classInstance.updater.emitUpdate(newVdom.props);
+}
+
+/**
+ * 深度比较儿子们,递归
+ *
+ * @param {*} parentNode  <div id="counter">
+ * @param {*} oldVchildren  <p2> <childcounter> <button>
+ * @param {*} newVchildren <p4> <null> <button>
+ */
+function updateChildren(parentNode, oldVchildren, newVchildren) {
+  // 为了方便安索引一一对比，全部搞成数组
+  oldVchildren = Array.isArray(oldVchildren) ? oldVchildren : [oldVchildren];
+  newVchildren = Array.isArray(newVchildren) ? newVchildren : [newVchildren];
+  let maxLength = Math.max(oldVchildren.length, newVchildren.length);
+  for (let i = 0; i < maxLength; i++) {
+    compareTwoVdom(parentNode, oldVchildren[i], newVchildren[i]);
   }
 }
 

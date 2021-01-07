@@ -36,7 +36,9 @@ class Updater {
    */
   addState(partialState, callback) {
     this.pendingStates.push(partialState);
-    this.callbacks.push(callback);
+    if (typeof callback === "function") {
+      this.callbacks.push(callback);
+    }
     this.emitUpdate();
   }
 
@@ -47,7 +49,8 @@ class Updater {
    * @param {*} newProps
    * @memberof Updater
    */
-  emitUpdate(newProps) {
+  emitUpdate(nextProps) {
+    this.nextProps = nextProps;
     updateQueue.isBatchingUpdate
       ? updateQueue.add(this)
       : this.updateComponent();
@@ -59,27 +62,35 @@ class Updater {
    * @memberof Updater
    */
   updateComponent() {
-    let { classInstance, pendingStates, callbacks } = this;
-    if (pendingStates.length > 0) {
+    let { classInstance, pendingStates, callbacks, nextProps } = this;
+    // 有新的属性或者pendingstate中有缓存的state更新行为都去询问
+    if (nextProps || pendingStates.length > 0) {
       // 需要添加shouldComponentUpdate的逻辑
-      this.shouldUpdate(classInstance, pendingStates, callbacks);
+      // !不管组件是否渲染 组件的state都会变化
+      this.shouldUpdate(classInstance, nextProps, this.getState(), callbacks);
     }
   }
 
   /**
    * 用来添加shouldComponentUpdate的逻辑
-   * !不管组件是否渲染 组件的state都会变化
-   * * classInstance.state = this.getState();一定会执行
+   * * 如果有新的属性也会触发更新
    *
    * @param {*} classInstance
    * @param {*} callbacks
    * @memberof Updater
    */
-  shouldUpdate(classInstance, callbacks) {
-    classInstance.state = this.getState();
+  shouldUpdate(classInstance, nextProps, nextState, callbacks) {
+    //如果组件从父组件接收到了新props需要更新
+    if (nextProps) {
+      classInstance.props = nextProps;
+    }
+    classInstance.state = nextState;
     if (
       classInstance.shouldComponentUpdate &&
-      !classInstance.shouldComponentUpdate({}, classInstance.state)
+      !classInstance.shouldComponentUpdate(
+        classInstance.props,
+        classInstance.state
+      )
     ) {
       return;
     }

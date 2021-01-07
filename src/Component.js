@@ -1,6 +1,7 @@
 import Updater from "./Updater";
 import { compareTwoVdom, createDOM } from "./react-dom";
 import { findDOM } from "./react-dom";
+import { wrapToVdom } from "./utils";
 class Component {
   static isReactComponent = true;
   constructor(props) {
@@ -24,14 +25,10 @@ class Component {
     if (this.componentWillUpdate) {
       this.componentWillUpdate();
     }
-    const newRenderVdom = this.render();
+    const newRenderVdom = wrapToVdom(this.render());
     const oldRenderVdom = this.oldRenderVdom;
-    console.log(this.vdom);
-    console.log(this);
-    findDOM(this.vdom);
-    debugger;
+
     const oldDom = oldRenderVdom.dom;
-    console.log(oldDom);
     // 实现简易的dom-diff
     compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom);
     this.oldRenderVdom = newRenderVdom;
