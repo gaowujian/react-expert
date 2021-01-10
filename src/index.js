@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { HashRouter as Router, Route } from "./react-router-dom";
+import { HashRouter as Router, Route } from "react-router-dom";
 
 export default class App extends React.Component {
   render() {
@@ -17,6 +17,7 @@ export default class App extends React.Component {
 }
 
 function Home(props) {
+  console.log(props);
   return (
     <div>
       <h1>home</h1>
@@ -34,7 +35,6 @@ function Profile() {
   return <div>Profile</div>;
 }
 function User(props) {
-  console.log(props.location.state);
   return (
     <div>
       User

@@ -1,6 +1,6 @@
 const createHashHistory = () => {
   // 默认行为
-  let action = "PUSH";
+  let action;
   let listeners = [];
   // hashhistory需要自己维护一个栈和路由跳转时候携带的state
   let historyStack = []; //
@@ -27,6 +27,7 @@ const createHashHistory = () => {
       // 覆盖操作，而不是不同的进栈出栈操作
       historyStack[++historyIndex] = history.location;
     }
+
     // 修改传入Router的history值
     Object.assign(history, { action, location: { pathname, state } });
     // 回调负责修改router内的state值，触发页面的渲染
@@ -41,6 +42,7 @@ const createHashHistory = () => {
    * 调用回调函数来执行页面的重新渲染
    * @param {*} pathname
    */
+  //   push行为
   function push(pathname, nextState) {
     action = "PUSH";
     // 兼容 push的不同参数
@@ -53,6 +55,7 @@ const createHashHistory = () => {
     //   给hash值赋值不需要 #, 但是取出的时候带#
     window.location.hash = pathname;
   }
+  //   pop行为
   function go(n) {
     action = "POP";
     historyIndex += n;
