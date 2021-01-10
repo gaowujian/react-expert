@@ -17,10 +17,16 @@ class Counter extends React.Component {
     console.log("Parent Counter: didmount 挂载完成");
   }
   componentWillUpdate(nextProps, nextState) {
+    console.log("this.state:", this.state);
+    console.log("nextProps:", nextProps);
+    console.log("nextState:", nextState);
     console.log("Parent counter will update将要更新");
   }
 
   componentDidUpdate(prevProps, prevState) {
+    console.log("this.state:", this.state);
+    console.log("nextProps:", prevProps);
+    console.log("nextState:", prevState);
     console.log("Parent counter did update更新完成");
   }
   componentWillUnmount() {
@@ -28,8 +34,9 @@ class Counter extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
+    console.log(this.state);
     console.log("Parent counter should component update 询问是否更新");
-    return nextState.number % 2 === 0;
+    return true;
   }
 
   handleClick = () => {
@@ -41,14 +48,8 @@ class Counter extends React.Component {
     return (
       <div id={this.state.number + "counter"}>
         <h1>count:{this.state.number}</h1>
-        {this.state.number === 4 ? null : (
-          <ChildCounter number={this.state.number} />
-        )}
-        {/* {this.state.number === 4 ? null : (
-          <Counter2 number={this.state.number} />
-        )} */}
+
         <button onClick={this.handleClick}>+</button>
-        <FunctionCounter number={this.state.number} />
       </div>
     );
   }
