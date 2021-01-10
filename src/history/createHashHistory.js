@@ -23,17 +23,19 @@ const createHashHistory = () => {
     if (pathname === "/") {
       window.location.hash = "/";
     }
+    // debugger;
+    // 修改传入Router的history值
+    Object.assign(history, { action, location: { pathname, state } });
     if (action === "PUSH") {
       // 覆盖操作，而不是不同的进栈出栈操作
       historyStack[++historyIndex] = history.location;
     }
 
-    // 修改传入Router的history值
-    Object.assign(history, { action, location: { pathname, state } });
     // 回调负责修改router内的state值，触发页面的渲染
     listeners.forEach((listener) => {
       listener(history.location);
     });
+    console.log("historyStack:", historyStack);
   });
 
   /**
@@ -52,6 +54,7 @@ const createHashHistory = () => {
     } else {
       state = nextState;
     }
+    historyStack.push({ state, pathname });
     //   给hash值赋值不需要 #, 但是取出的时候带#
     window.location.hash = pathname;
   }
@@ -59,8 +62,8 @@ const createHashHistory = () => {
   function go(n) {
     action = "POP";
     historyIndex += n;
-    let nextLocation = historyStack[historyIndex] || {};
-    state = nextLocation.state;
+    let nextLocation = historyStack[historyIndex];
+    state = nextLocation && nextLocation.state;
     window.location.hash = nextLocation.pathname;
   }
   function goBack() {
@@ -81,7 +84,13 @@ const createHashHistory = () => {
     listen,
     push,
   };
-  //   window.location.hash = window.location.hash.slice(1) || "/";
+  // 第一次行为
+  action = "PUSH";
+  window.location.hash = window.location.hash
+    ? window.location.hash.slice(1)
+    : "/";
+  console.log("第一次渲染");
+  console.log("window.location.hash:", window.location.hash);
   return history;
 };
 

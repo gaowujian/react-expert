@@ -8,7 +8,7 @@ export default class Route extends Component {
   render() {
     const { location, history } = this.context;
     const { component: RouteComponent } = this.props;
-    const match = matchPath(window.location.pathname, this.props);
+    const match = matchPath(location.pathname, this.props);
     const routeProps = { history, location, match };
     let renderElement = null;
 

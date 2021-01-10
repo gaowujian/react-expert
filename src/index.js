@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { HashRouter as Router, Route } from "react-router-dom";
+import { HashRouter as Router, Route } from "./react-router-dom";
 
 export default class App extends React.Component {
   render() {
@@ -35,6 +35,7 @@ function Profile() {
   return <div>Profile</div>;
 }
 function User(props) {
+  console.log(props);
   return (
     <div>
       User
